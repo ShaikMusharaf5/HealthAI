@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HealthAI - Intelligent Healthcare Assistant</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background:rgb(195, 233, 248);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: #fff;
+            padding: 24px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .form-row {
+            margin-bottom: 16px;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 14px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .main {
+            flex-grow: 1;
+            padding: 30px 40px;
+            overflow-y: auto;
+        }
+
+        .main h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .main p {
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        .chat-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .chat-message {
+            margin-bottom: 14px;
+            padding: 14px;
+            border-radius: 12px;
+        }
+
+        .chat-message.user {
+            background: #ffecec;
+            color:rgb(4, 12, 24);
+        }
+
+        .chat-message.bot {
+            background: #fff8e1;
+            color:rgb(210, 97, 178);
+        }
+
+        .input-area {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 12px;
+            font-size: 14px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+        }
+
+        .input-area button {
+            padding: 12px 18px;
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .input-area button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar / Patient Profile -->
+    <div class="sidebar">
+        <h3>Patient Profile 😷</h3>
+        <div class="form-row">
+            <label>🧑🏻‍🔬 Name</label>
+            <input type="text" placeholder="Name"  >
+        </div>
+        <div class="form-row">
+            <label>🐦‍🔥 Age</label>
+            <input type="number" placeholder="Age" >
+        </div>
+        <div class="form-row">
+    <label for="gender"> Gender</label>
+    <select id="gender" name=" gender">
+        <option value="">-- Select Gender --</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+        <option value="other">Other</option>
+    </select>
+</div>
+
+        <div class="form-row">
+            <label>⚕ Medical History ⚕</label>
+            <input type="text" placeholder="Enter Your medical History"  >
+        </div>
+        <div class="form-row">
+            <label>💊 Current Medications 💉</label>
+            <input type="text" placeholder="Enter Your Current Medications"  >
+        </div>
+        <div class="form-row">
+            <label>🤧 Allergies</label>
+            <input type="text" placeholder="None" >
+        </div>
+    </div>
+
+    <!-- Main Chat Area -->
+    <div class="main">
+        <h1>🩺 HealthAI - Intelligent Healthcare Assistant</h1>
+        <p>24/7 Patient Support<br>Ask any health-related question for immediate assistance.</p>
+
+        <div class="chat-box" id="chat-box">
+            <div class="chat-message user">
+               🤖:- Ask Your Queries Here 🧐
+            </div>
+            
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Ask your health question...">
+            <button onclick="sendMessage()">➤</button>
+        </div>
+        <div style="margin-top: 20px;">
+    <a href="/dashboard" style="text-decoration: none;">
+        <button style="
+            background-color:rgb(33, 243, 212);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        ">
+            🔍 View Real-Time Health Dashboard
+        </button>
+    </a>
+</div>
+
+    </div>
+    
+
+
+
+    <script>
+    function sendMessage() {
+        const input = document.getElementById("user-input");
+        const message = input.value.trim();
+        if (!message) return;
+
+        // Show user message
+        const chatBox = document.getElementById("chat-box");
+        const userMsg = document.createElement("div");
+        userMsg.className = "chat-message user";
+        userMsg.textContent = message;
+        chatBox.appendChild(userMsg);
+        input.value = "";
+
+        // Show temporary bot loading message
+        const botMsg = document.createElement("div");
+        botMsg.className = "chat-message bot";
+        botMsg.textContent = "⏳ Generating response...";
+        chatBox.appendChild(botMsg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // Fetch actual response from backend
+        fetch("/ask", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message })
+        })
+        .then(res => res.json())
+        .then(data => {
+            botMsg.textContent = data.response || "⚠️ No response received.";
+            chatBox.scrollTop = chatBox.scrollHeight;
+        })
+        .catch(() => {
+            botMsg.textContent = "❌ Failed to get response.";
+        });
+    }
+</script>
+
+</body>
+</html>

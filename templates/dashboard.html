@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HealthAI Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #eef4f7;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 16px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<h2>📊 HealthAI Real-Time Health Dashboard</h2>
+
+<div class="chart-container" id="heart-rate"></div>
+<div class="chart-container" id="blood-pressure"></div>
+<div class="chart-container" id="blood-glucose"></div>
+<div class="chart-container" id="symptom-pie"></div>
+<div style="text-align: center; margin-top: 20px;">
+    <a href="/" style="text-decoration: none;">
+        <button style="
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        ">
+            ⬅️ Back to Chat
+        </button>
+    </a>
+</div>
+
+<script>
+    async function fetchHealthData() {
+        const response = await fetch('/data');
+        const data = await response.json();
+
+        Plotly.newPlot('heart-rate', [{
+            x: data.heart_rate.map(item => item[0]),
+            y: data.heart_rate.map(item => item[1]),
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: 'Heart Rate',
+            line: { color: 'red' }
+        }], { title: 'Heart Rate Trend (BPM)' });
+
+        Plotly.newPlot('blood-pressure', [
+            {
+                x: data.blood_pressure.systolic.map(item => item[0]),
+                y: data.blood_pressure.systolic.map(item => item[1]),
+                name: 'Systolic',
+                type: 'scatter',
+                mode: 'lines',
+                line: { color: 'blue' }
+            },
+            {
+                x: data.blood_pressure.diastolic.map(item => item[0]),
+                y: data.blood_pressure.diastolic.map(item => item[1]),
+                name: 'Diastolic',
+                type: 'scatter',
+                mode: 'lines',
+                line: { color: 'purple' }
+            }
+        ], { title: 'Blood Pressure (mmHg)' });
+
+        Plotly.newPlot('blood-glucose', [{
+            x: data.glucose.map(item => item[0]),
+            y: data.glucose.map(item => item[1]),
+            type: 'bar',
+            marker: { color: 'orange' },
+            name: 'Glucose Level'
+        }], { title: 'Blood Glucose Levels (mg/dL)' });
+
+        Plotly.newPlot('symptom-pie', [{
+            values: Object.values(data.symptoms),
+            labels: Object.keys(data.symptoms),
+            type: 'pie'
+        }], { title: 'Symptom Distribution' });
+    }
+
+    fetchHealthData();
+    setInterval(fetchHealthData, 3000);  // refresh every 3 seconds
+</script>
+
+</body>
+</html>
